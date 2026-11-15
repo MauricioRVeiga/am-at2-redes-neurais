@@ -65,11 +65,21 @@ Documentação interativa em http://127.0.0.1:8000/docs.
 | Método | Rota | Descrição |
 |---|---|---|
 | GET | `/diagnostico/modelo` | Status do serviço e tipo do modelo |
-| POST | `/predict` | Recebe os dados do cliente e retorna `categoria_prevista` e `score_confianca` |
+| POST | `/predict` | Recebe os dados do cliente e retorna `categoria_prevista`, `score_confianca` e `probabilidade_cancelamento` |
+
+`score_confianca` é a probabilidade da classe prevista. `probabilidade_cancelamento` é sempre a probabilidade de `cancela`, para quem precisar aplicar um limiar de decisão diferente de 0,5.
+
+### Validação da entrada
+
+- Tipos estritos: texto em campo numérico, número em texto ou booleano em inteiro retornam `422`.
+- Categorias restritas aos valores existentes na base.
+- Limites numéricos: `tenure` de 0 a 72, `MonthlyCharges` de 0 a 150 e `TotalCharges` de 0 a 10.800.
+- Consistência entre campos: `MultipleLines = "No phone service"` exige `PhoneService = "No"` (e vice-versa); os serviços de internet usam `"No internet service"` exatamente quando `InternetService = "No"`; `TotalCharges` não pode passar de `tenure × 150`.
+- O corpo deve conter apenas as 19 features. `customerID` não é aceito.
 
 ### Testar
 
-Com a API rodando, abra `requisicoes.http` no VS Code (extensão REST Client) ou em uma IDE JetBrains e execute as requisições. O arquivo cobre o endpoint de metadados, dois perfis com predições opostas e dois payloads inválidos que retornam `422`.
+Com a API rodando, abra `requisicoes.http` no VS Code (extensão REST Client) ou em uma IDE JetBrains e execute as requisições. O arquivo cobre o endpoint de metadados, dois perfis com predições opostas e três payloads inválidos que retornam `422`.
 
 Exemplo com curl:
 

@@ -112,3 +112,30 @@ Content-Type: application/json
   "MonthlyCharges": -10.0,
   "TotalCharges": 50.0
 }
+
+### 6. Entrada inválida - serviço de internet contratado sem plano de internet (esperado 422)
+POST {{base}}/predict
+User-Agent: Tester-Audit-Agent
+Content-Type: application/json
+
+{
+  "gender": "Male",
+  "SeniorCitizen": 0,
+  "Partner": "No",
+  "Dependents": "No",
+  "tenure": 10,
+  "PhoneService": "Yes",
+  "MultipleLines": "No",
+  "InternetService": "No",
+  "OnlineSecurity": "No internet service",
+  "OnlineBackup": "No internet service",
+  "DeviceProtection": "No internet service",
+  "TechSupport": "No internet service",
+  "StreamingTV": "Yes",
+  "StreamingMovies": "No internet service",
+  "Contract": "One year",
+  "PaperlessBilling": "No",
+  "PaymentMethod": "Mailed check",
+  "MonthlyCharges": 20.0,
+  "TotalCharges": 200.0
+}

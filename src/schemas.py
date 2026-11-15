@@ -1,13 +1,17 @@
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+MENSALIDADE_MAXIMA = 150
 SimNao = Literal["Yes", "No"]
 ServicoDeInternet = Literal["Yes", "No", "No internet service"]
+SERVICOS_DE_INTERNET = (
+    "OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies",
+)
 
 
 class Cliente(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
     gender: Literal["Male", "Female"] = Field(description="Gênero do cliente", examples=["Female"])
     SeniorCitizen: int = Field(ge=0, le=1, description="1 se o cliente tem 65 anos ou mais", examples=[0])
@@ -34,10 +38,37 @@ class Cliente(BaseModel):
     PaymentMethod: Literal[
         "Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"
     ] = Field(description="Forma de pagamento", examples=["Electronic check"])
-    MonthlyCharges: float = Field(ge=0, le=150, description="Valor da mensalidade", examples=[89.9])
-    TotalCharges: float = Field(ge=0, le=10_000, description="Total cobrado durante a permanência", examples=[1078.8])
+    MonthlyCharges: float = Field(
+        ge=0, le=MENSALIDADE_MAXIMA, allow_inf_nan=False, description="Valor da mensalidade", examples=[89.9]
+    )
+    TotalCharges: float = Field(
+        ge=0, le=72 * MENSALIDADE_MAXIMA, allow_inf_nan=False,
+        description="Total cobrado durante a permanência", examples=[1078.8],
+    )
+
+    @model_validator(mode="after")
+    def validar_consistencia(self) -> Self:
+        sem_telefone = self.PhoneService == "No"
+        if sem_telefone != (self.MultipleLines == "No phone service"):
+            raise ValueError("MultipleLines deve ser 'No phone service' se, e somente se, PhoneService for 'No'")
+
+        sem_internet = self.InternetService == "No"
+        for servico in SERVICOS_DE_INTERNET:
+            if sem_internet != (getattr(self, servico) == "No internet service"):
+                raise ValueError(
+                    f"{servico} deve ser 'No internet service' se, e somente se, InternetService for 'No'"
+                )
+
+        if self.TotalCharges > self.tenure * MENSALIDADE_MAXIMA:
+            raise ValueError(
+                f"TotalCharges não pode exceder tenure x {MENSALIDADE_MAXIMA} ({self.tenure * MENSALIDADE_MAXIMA})"
+            )
+        return self
 
 
 class Predicao(BaseModel):
     categoria_prevista: Literal["cancela", "permanece"] = Field(description="Classe inferida pelo modelo")
     score_confianca: float = Field(ge=0, le=1, description="Probabilidade da classe prevista")
+    probabilidade_cancelamento: float = Field(
+        ge=0, le=1, description="Probabilidade de cancelamento, útil para aplicar limiares de decisão próprios"
+    )

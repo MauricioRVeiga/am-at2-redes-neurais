@@ -50,7 +50,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.163.0" },
     { name = "joblib", specifier = ">=1.6.0" },
     { name = "pandas", specifier = ">=3.1.1" },
-    { name = "scikit-learn", specifier = ">=1.9.1" },
+    { name = "scikit-learn", specifier = "==1.9.1" },
 ]
 
 [package.metadata.requires-dev]
