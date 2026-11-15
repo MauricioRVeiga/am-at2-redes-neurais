@@ -1,0 +1,114 @@
+@base = http://127.0.0.1:8000
+
+### 1. Metadados do serviço
+GET {{base}}/diagnostico/modelo
+User-Agent: Tester-Audit-Agent
+Accept: application/json
+
+### 2. Predição - cliente novo, contrato mensal, fibra e boleto eletrônico (perfil de risco)
+POST {{base}}/predict
+User-Agent: Tester-Audit-Agent
+Content-Type: application/json
+
+{
+  "gender": "Female",
+  "SeniorCitizen": 1,
+  "Partner": "No",
+  "Dependents": "No",
+  "tenure": 2,
+  "PhoneService": "Yes",
+  "MultipleLines": "No",
+  "InternetService": "Fiber optic",
+  "OnlineSecurity": "No",
+  "OnlineBackup": "No",
+  "DeviceProtection": "No",
+  "TechSupport": "No",
+  "StreamingTV": "Yes",
+  "StreamingMovies": "Yes",
+  "Contract": "Month-to-month",
+  "PaperlessBilling": "Yes",
+  "PaymentMethod": "Electronic check",
+  "MonthlyCharges": 99.65,
+  "TotalCharges": 199.3
+}
+
+### 3. Predição - cliente antigo, contrato de dois anos e débito automático (perfil fiel)
+POST {{base}}/predict
+User-Agent: Tester-Audit-Agent
+Content-Type: application/json
+
+{
+  "gender": "Male",
+  "SeniorCitizen": 0,
+  "Partner": "Yes",
+  "Dependents": "Yes",
+  "tenure": 68,
+  "PhoneService": "Yes",
+  "MultipleLines": "Yes",
+  "InternetService": "DSL",
+  "OnlineSecurity": "Yes",
+  "OnlineBackup": "Yes",
+  "DeviceProtection": "Yes",
+  "TechSupport": "Yes",
+  "StreamingTV": "No",
+  "StreamingMovies": "No",
+  "Contract": "Two year",
+  "PaperlessBilling": "No",
+  "PaymentMethod": "Bank transfer (automatic)",
+  "MonthlyCharges": 74.4,
+  "TotalCharges": 5059.2
+}
+
+### 4. Entrada inválida - texto em campo numérico (esperado 422)
+POST {{base}}/predict
+User-Agent: Tester-Audit-Agent
+Content-Type: application/json
+
+{
+  "gender": "Female",
+  "SeniorCitizen": 0,
+  "Partner": "No",
+  "Dependents": "No",
+  "tenure": "invalido",
+  "PhoneService": "Yes",
+  "MultipleLines": "No",
+  "InternetService": "DSL",
+  "OnlineSecurity": "No",
+  "OnlineBackup": "No",
+  "DeviceProtection": "No",
+  "TechSupport": "No",
+  "StreamingTV": "No",
+  "StreamingMovies": "No",
+  "Contract": "Month-to-month",
+  "PaperlessBilling": "Yes",
+  "PaymentMethod": "Mailed check",
+  "MonthlyCharges": 50.0,
+  "TotalCharges": 50.0
+}
+
+### 5. Entrada inválida - valores fora dos limites e categoria inexistente (esperado 422)
+POST {{base}}/predict
+User-Agent: Tester-Audit-Agent
+Content-Type: application/json
+
+{
+  "gender": "Female",
+  "SeniorCitizen": 3,
+  "Partner": "No",
+  "Dependents": "No",
+  "tenure": 120,
+  "PhoneService": "Yes",
+  "MultipleLines": "No",
+  "InternetService": "Satellite",
+  "OnlineSecurity": "No",
+  "OnlineBackup": "No",
+  "DeviceProtection": "No",
+  "TechSupport": "No",
+  "StreamingTV": "No",
+  "StreamingMovies": "No",
+  "Contract": "Month-to-month",
+  "PaperlessBilling": "Yes",
+  "PaymentMethod": "Mailed check",
+  "MonthlyCharges": -10.0,
+  "TotalCharges": 50.0
+}
